@@ -7,7 +7,6 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PlayerWalletAPI.Models.Request;
@@ -56,17 +55,17 @@ namespace PlayerWalletAPI.Controllers.v1
         /// <summary>
         /// Returns Player object based on its Guid
         /// </summary>
-        /// <param name="guid"></param>
+        /// <param name="playerId"></param>
         /// <returns>Player object</returns>
-        [HttpGet("{guid}")]
+        [HttpGet("{playerId}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlayerModelResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestObjectResult))]
-        public async Task<IActionResult> Get([FromRoute] Guid guid)
+        public async Task<IActionResult> Get([FromRoute] Guid playerId)
         {
             var result = await _db.Players
-                .Where(p => p.Id == guid)
+                .Where(p => p.Id == playerId)
                 .ProjectTo<PlayerModelResponse>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
 
@@ -95,7 +94,7 @@ namespace PlayerWalletAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlayerModelResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestObjectResult))]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ValidateNewPlayer] // Perform new Player validations (PlayerWalletAPI\Validators\ValidateNewPlayer.cs)
+        [ValidateNewPlayer] // Perform new Player validations (Validators\ValidateNewPlayer.cs)
         public async Task<IActionResult> Add([FromBody] PlayerAddRequest model)
         {
             // at this point model has been validated
@@ -112,11 +111,11 @@ namespace PlayerWalletAPI.Controllers.v1
             await _db.SaveChangesAsync();
 
             // TODO: More structured logging with NLog
-            _logger.LogInformation($@">>>PlayerController.Add() success - Id ""{model.TransactionId}"", Name ""{model.PlayerName}"".");
+            _logger.LogInformation($@">>> PlayerController.Add() success - Id ""{model.TransactionId}"", Name ""{model.PlayerName}"".");
 
             var result = _mapper.Map<Player, PlayerModelResponse>(newPlayer);
 
-            return Ok(result);
+            return Created($"/v1/{ControllerContext.ActionDescriptor.ControllerName}/{model.TransactionId}", result);
         }
     }
 }
