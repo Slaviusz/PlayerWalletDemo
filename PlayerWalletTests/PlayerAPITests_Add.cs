@@ -17,8 +17,6 @@ namespace PlayerWalletTests
         [Fact]
         private async Task TestPlayerAdd()
         {
-            var client = _factory.CreateClient();
-
             var newPlayerGuid = Guid.NewGuid();
 
             var json = JsonSerializer
@@ -31,9 +29,12 @@ namespace PlayerWalletTests
 
             var requestModel = new StringContent(json, Encoding.UTF8, "application/json");
 
+            var client = _factory.CreateClient();
             var response = await client.PostAsync("v1/Player/Add", requestModel);
 
             Should.NotThrow(() => { response.EnsureSuccessStatusCode(); });
+
+            response.StatusCode.ShouldBe(HttpStatusCode.Created);
 
             PlayerModelResponse player = null;
 
@@ -45,9 +46,12 @@ namespace PlayerWalletTests
 
             // repeated request
 
-            var response2 = await client.PostAsync("v1/Player/Add", requestModel);
+            var client2 = _factory.CreateClient();
+            var response2 = await client2.PostAsync("v1/Player/Add", requestModel);
 
             Should.NotThrow(() => { response2.EnsureSuccessStatusCode(); });
+
+            response2.StatusCode.ShouldBe(HttpStatusCode.OK);
 
             PlayerModelResponse player2 = null;
 
