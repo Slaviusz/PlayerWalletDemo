@@ -82,7 +82,7 @@ namespace PlayerWalletAPI.Controllers.v1
         /// </summary>
         /// <remarks>
         /// Validations:
-        /// * PlayerName length 8-20 characters
+        /// * PlayerName length 4-20 characters
         /// * PlayerAge >= 18 y
         /// * PlayerName does not exist yet
         /// </remarks>
