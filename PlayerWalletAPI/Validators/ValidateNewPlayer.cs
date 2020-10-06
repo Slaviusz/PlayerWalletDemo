@@ -39,8 +39,15 @@ namespace PlayerWalletAPI.Validators
                 ) // Combine the condition to avoid double database access
                 .FirstOrDefaultAsync();
 
+            if (existingPlayer == null)
+            {
+                // continue normal execution
+                await next();
+                return;
+            }
+
             // this transaction is repeated
-            if (existingPlayer?.Id == transactionId)
+            if (existingPlayer.Id == transactionId)
             {
                 var repeatedResult = mapper.Map<Player, PlayerModelResponse>(existingPlayer);
                 repeatedResult.Repeated = true;
@@ -49,7 +56,7 @@ namespace PlayerWalletAPI.Validators
             }
 
             // conflicting PlayerName
-            if (existingPlayer?.PlayerName == playerName)
+            if (existingPlayer.PlayerName == playerName)
             {
                 context.Result = new ConflictObjectResult(new
                 {
@@ -58,11 +65,6 @@ namespace PlayerWalletAPI.Validators
                 });
                 return;
             }
-
-            await next();
-
-            // post execution actions
         }
     }
-
 }
