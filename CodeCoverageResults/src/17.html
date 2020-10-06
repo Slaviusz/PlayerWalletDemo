@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Models/Response/PlayerModelResponse.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.ComponentModel;
+using AutoMapper;
+using AutoMapper.Configuration.Annotations;
+using PlayerWalletContext.Entities;
+#nullable disable
+
+namespace PlayerWalletAPI.Models.Response
+{
+    /// &lt;summary&gt;
+    /// Response model from PlayerController Get* methods
+    /// &lt;/summary&gt;
+    [AutoMap(typeof(Player))]
+    public class PlayerModelResponse
+    {
+        public Guid Id { get; set; }
+        public bool Active { get; set; }
+
+        /// &lt;summary&gt;
+        /// Player name
+        /// &lt;/summary&gt;
+        /// &lt;example&gt;ExamplePlayerName&lt;/example&gt;
+        [SourceMember(&quot;PlayerName&quot;)]
+        public string Name { get; set; }
+
+        [DefaultValue(false)]
+        public bool Repeated { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,26,16,30,1],[16,31,16,35,1],[17,30,17,34,1],[17,35,17,39,1],[24,30,24,34,1],[24,35,24,39,1],[27,32,27,36,1],[27,37,27,41,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/AutoMap/AutoMapperConfig.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using AutoMapper;
+using PlayerWalletAPI.Models.Request;
+using PlayerWalletAPI.Models.Response;
+using PlayerWalletContext.Entities;
+#pragma warning disable 1591
+
+// ReSharper disable UnusedType.Global
+// ReSharper disable UnusedMember.Global
+
+namespace PlayerWalletAPI.AutoMap
+{
+    public class AutoMapperConfig : Profile
+    {
+        public AutoMapperConfig()
+        {
+            // Player DTO to ResponseModel
+            CreateMap&lt;Player, PlayerModelResponse&gt;();
+
+            // PlayerAddRequest from PlayerController.Add() to Player DTO
+            var map1 = CreateMap&lt;PlayerAddRequest, Player&gt;();
+            map1.ForMember(player =&gt; player.Id, opt =&gt; opt.MapFrom(add =&gt; add.TransactionId));
+            map1.ForMember(player =&gt; player.PlayerName, opt =&gt; opt.MapFrom(add =&gt; add.PlayerName));
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,34,1],[15,9,15,10,1],[17,13,17,54,1],[20,13,20,62,1],[21,13,21,56,1],[21,56,21,93,1],[21,93,21,95,1],[21,13,21,95,1],[22,13,22,64,1],[22,64,22,98,1],[22,98,22,100,1],[22,13,22,100,1],[23,9,23,10,1]]);
+    </script>
+  </body>
+</html>
