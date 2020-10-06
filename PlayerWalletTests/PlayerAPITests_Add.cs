@@ -135,5 +135,31 @@ namespace PlayerWalletTests
             problemDetails.Errors.ShouldContainKey("PlayerName");
             problemDetails.Errors["PlayerName"].First().ShouldMatch("name must be between");
         }
+
+        [Fact]
+        private async Task TestPlayerAdd_PlayerTooYoung()
+        {
+            var client = _factory.CreateClient();
+
+            var json = JsonSerializer
+                .Serialize(new PlayerAddRequest
+                {
+                    TransactionId = Guid.NewGuid(),
+                    BirthDate = DateTime.Now.AddYears(-17).AddDays(-364),
+                    PlayerName = "Kiddo123"
+                });
+
+            var requestModel = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync("v1/Player/Add", requestModel);
+
+            response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+            var problemDetails = await JsonSerializer
+                .DeserializeAsync<ValidationProblemDetails>(response.Content.ReadAsStreamAsync().Result);
+
+            problemDetails.Errors.ShouldContainKey("BirthDate");
+            problemDetails.Errors["BirthDate"].First().ShouldMatch("must be at least 18 years old");
+        }
     }
 }
