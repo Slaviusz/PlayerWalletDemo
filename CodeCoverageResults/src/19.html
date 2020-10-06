@@ -17,7 +17,6 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PlayerWalletAPI.Models.Request;
@@ -66,17 +65,17 @@ namespace PlayerWalletAPI.Controllers.v1
         /// &lt;summary&gt;
         /// Returns Player object based on its Guid
         /// &lt;/summary&gt;
-        /// &lt;param name=&quot;guid&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;playerId&quot;&gt;&lt;/param&gt;
         /// &lt;returns&gt;Player object&lt;/returns&gt;
-        [HttpGet(&quot;{guid}&quot;)]
+        [HttpGet(&quot;{playerId}&quot;)]
         [Produces(&quot;application/json&quot;)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlayerModelResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestObjectResult))]
-        public async Task&lt;IActionResult&gt; Get([FromRoute] Guid guid)
+        public async Task&lt;IActionResult&gt; Get([FromRoute] Guid playerId)
         {
             var result = await _db.Players
-                .Where(p =&gt; p.Id == guid)
+                .Where(p =&gt; p.Id == playerId)
                 .ProjectTo&lt;PlayerModelResponse&gt;(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
 
@@ -93,7 +92,7 @@ namespace PlayerWalletAPI.Controllers.v1
         /// &lt;/summary&gt;
         /// &lt;remarks&gt;
         /// Validations:
-        /// * PlayerName length 8-20 characters
+        /// * PlayerName length 4-20 characters
         /// * PlayerAge &gt;= 18 y
         /// * PlayerName does not exist yet
         /// &lt;/remarks&gt;
@@ -105,7 +104,7 @@ namespace PlayerWalletAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlayerModelResponse))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestObjectResult))]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ValidateNewPlayer] // Perform new Player validations (PlayerWalletAPI\Validators\ValidateNewPlayer.cs)
+        [ValidateNewPlayer] // Perform new Player validations (Validators\ValidateNewPlayer.cs)
         public async Task&lt;IActionResult&gt; Add([FromBody] PlayerAddRequest model)
         {
             // at this point model has been validated
@@ -122,18 +121,18 @@ namespace PlayerWalletAPI.Controllers.v1
             await _db.SaveChangesAsync();
 
             // TODO: More structured logging with NLog
-            _logger.LogInformation($@&quot;&gt;&gt;&gt;PlayerController.Add() success - Id &quot;&quot;{model.TransactionId}&quot;&quot;, Name &quot;&quot;{model.PlayerName}&quot;&quot;.&quot;);
+            _logger.LogInformation($@&quot;&gt;&gt;&gt; PlayerController.Add() success - Id &quot;&quot;{model.TransactionId}&quot;&quot;, Name &quot;&quot;{model.PlayerName}&quot;&quot;.&quot;);
 
             var result = _mapper.Map&lt;Player, PlayerModelResponse&gt;(newPlayer);
 
-            return Ok(result);
+            return Created($&quot;/v1/{ControllerContext.ActionDescriptor.ControllerName}/{model.TransactionId}&quot;, result);
         }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[29,9,33,14,1],[34,9,34,10,1],[35,13,35,30,1],[36,13,36,29,1],[37,13,37,30,1],[38,9,38,10,1],[48,9,48,10,1],[49,13,51,33,1],[53,13,53,31,1],[54,9,54,10,1],[67,9,67,10,1],[68,13,71,40,1],[73,13,73,32,1],[74,13,74,14,1],[75,17,75,45,1],[78,13,78,31,1],[79,9,79,10,1],[100,9,100,10,1],[102,13,102,56,1],[103,13,103,37,1],[107,13,107,40,1],[112,13,112,42,1],[115,13,115,136,1],[117,13,117,78,1],[119,13,119,31,1],[120,9,120,10,1]]);
+      highlightRanges([[28,9,32,14,1],[33,9,33,10,1],[34,13,34,30,1],[35,13,35,29,1],[36,13,36,30,1],[37,9,37,10,1],[47,9,47,10,1],[48,13,50,33,1],[52,13,52,31,1],[53,9,53,10,1],[66,9,66,10,1],[67,13,70,40,1],[72,13,72,32,1],[73,13,73,14,1],[74,17,74,45,1],[77,13,77,31,1],[78,9,78,10,1],[99,9,99,10,1],[101,13,101,56,1],[102,13,102,37,1],[106,13,106,40,1],[111,13,111,42,1],[114,13,114,137,1],[116,13,116,78,1],[118,13,118,118,1],[119,9,119,10,1]]);
     </script>
   </body>
 </html>
