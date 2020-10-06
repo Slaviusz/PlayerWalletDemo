@@ -78,8 +78,14 @@ namespace PlayerWalletContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // index on Active status for state validation
             modelBuilder.Entity<Player>()
                 .HasIndex(p => p.Active);
+
+            // unique index on player's name
+            modelBuilder.Entity<Player>()
+                .HasIndex(p => p.PlayerName)
+                .IsUnique();
 
             // Seed data to have something to start with
             SeedData(modelBuilder);
