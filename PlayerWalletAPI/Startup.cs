@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,7 +31,7 @@ namespace PlayerWalletAPI
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddJsonOptions(options =>
                 {
-                    options.JsonSerializerOptions.WriteIndented = true;
+                    options.JsonSerializerOptions.WriteIndented = true; // Convenience option, remove for production!
                     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                     options.JsonSerializerOptions.AllowTrailingCommas = true;
                 });
@@ -42,7 +43,7 @@ namespace PlayerWalletAPI
             // Automapper
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-            // Swagger
+            #region Swagger
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "PlayerWallet API", Version = "v1"});
@@ -59,11 +60,14 @@ namespace PlayerWalletAPI
                 // see: https://github.com/domaindrivendev/Swashbuckle/issues/442
                 c.CustomSchemaIds(x => x.FullName);
             });
-
-            //services.AddSwaggerExamplesFromAssemblyOf<Program>();
+            #endregion
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -71,22 +75,20 @@ namespace PlayerWalletAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            // configuration for deployment behind application proxy server (nginx, apache, IIS, etc.)
+            // configuration for deployment behind application proxy server (NGINX, Apache, IIS, etc.)
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
             });
 
             // disable HTTPS redirection in service oriented architecture
-            // there probably is probably an application proxy server in front of
+            // there probably is an HTTPS application proxy server in front
             //app.UseHttpsRedirection();
-
-            app.UseRouting();
 
             // Disable Authorization in service-to-service interfaces
             //app.UseAuthorization();
 
-            // Swagger
+            #region Swagger
             app.UseSwagger();
 
             app.UseSwaggerUI(c =>
@@ -95,20 +97,28 @@ namespace PlayerWalletAPI
                 c.DisplayOperationId();
                 c.DisplayRequestDuration();
             });
+            #endregion
 
             app.UseRouting();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
-            // Initial database seed
-            DatabaseInitialSeed(app);
+            // Initial database seed for first startup
+            DatabaseInitialSeed(app)
+                .ConfigureAwait(false)
+                .GetAwaiter().GetResult();
         }
 
-        private static void DatabaseInitialSeed(IApplicationBuilder app)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="app"></param>
+        /// <exception cref="InvalidOperationException">Failed to locate and instantiate service</exception>
+        private static async Task DatabaseInitialSeed(IApplicationBuilder app)
         {
             using var scope = app.ApplicationServices.CreateScope();
-            using var dbContext = scope.ServiceProvider.GetRequiredService<PlayerWalletContext.PlayerWalletContext>();
-            dbContext.Database.EnsureCreated();
+            await using var dbContext = scope.ServiceProvider.GetRequiredService<PlayerWalletContext.PlayerWalletContext>();
+            await dbContext.Database.MigrateAsync();
         }
     }
 }
