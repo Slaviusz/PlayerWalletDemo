@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Validators/ValidateExistingTransaction.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using PlayerWalletAPI.Controllers.v1;
+using PlayerWalletAPI.Models.Request;
+using PlayerWalletAPI.Models.Response;
+using PlayerWalletContext.Entities;
+
+namespace PlayerWalletAPI.Validators
+{
+    /// &lt;summary&gt;
+    /// Validator for PlayerController.Add()
+    /// &lt;/summary&gt;
+    // ReSharper disable once UnusedType.Global
+    public class ValidateExistingTransaction : ActionFilterAttribute
+    {
+        /// Validates if:
+        /// * transaction is retried (player already exists)
+        /// * new Player name conflicts with existing name in the DB
+        ///
+        /// &lt;returns&gt;Existing object if transaction is retried&lt;/returns&gt;
+        /// &lt;returns&gt;ConflictObject if Player Name already exists&lt;/returns&gt;
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            var db = context.HttpContext.RequestServices.GetRequiredService&lt;PlayerWalletContext.PlayerWalletContext&gt;();
+
+            var model = context.ActionArguments[&quot;model&quot;] as WalletOperationRequest;
+
+            var transactionId = model?.TransactionId;
+
+            var existingTransaction = await db.WalletLogs
+                .AsNoTracking()
+                .Where(p =&gt;
+                    p.TransactionId == transactionId
+                ) // Combine the condition to avoid double database access
+                .FirstOrDefaultAsync();
+
+            if (existingTransaction == null)
+            {
+                // continue normal execution
+                await next();
+                return;
+            }
+
+            // this transaction is repeated
+            if (existingTransaction.TransactionId == transactionId)
+            {
+                // Get previous return object stored in WalletLog Memento
+                var repeatedResultFromMemento = RepeatedWalletTransactionFactory.GetRepeatedResult(existingTransaction);
+                context.Result = repeatedResultFromMemento;
+            }
+        }
+    }
+
+    /// &lt;summary&gt;
+    /// Factory for building repeated WalletLog result
+    /// &lt;/summary&gt;
+    public static class RepeatedWalletTransactionFactory
+    {
+        /// &lt;summary&gt;
+        /// Method for building ObjectResult from WalletLog&#39;s Memento
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;logItem&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;/returns&gt;
+        /// &lt;exception cref=&quot;ArgumentOutOfRangeException&quot;&gt;&lt;/exception&gt;
+        public static IActionResult GetRepeatedResult(WalletLog logItem)
+        {
+            switch (logItem.ResultType)
+            {
+                case ResultType.Created:
+                    var createdResult = JsonSerializer.Deserialize&lt;WalletOperationResult&gt;(logItem.Memento);
+                    createdResult.Repeated = true;
+                    // TODO: Fill in uri to Get method where the transaction can be found
+                    return new CreatedResult(&quot;&quot;, createdResult);
+                case ResultType.UnprocessableEntity:
+                    return new UnprocessableEntityObjectResult(WalletController.UnprocessableWalletLogResponseObject);
+                case ResultType.BadRequest:
+                    var badRequestResult = JsonSerializer.Deserialize&lt;ValidationProblemDetails&gt;(logItem.Memento);
+                    return new BadRequestObjectResult(badRequestResult);
+                default:
+                    // throws Exception which returns 500 Internal Server Error
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[29,9,29,10,1],[30,13,30,120,1],[32,13,32,84,1],[34,13,34,54,1],[36,13,41,40,1],[43,13,43,45,1],[44,13,44,14,1],[46,17,46,30,1],[47,17,47,24,1],[51,13,51,68,1],[52,13,52,14,1],[54,17,54,121,1],[55,17,55,60,1],[56,13,56,14,1],[57,9,57,10,1],[72,9,72,10,1],[73,13,73,40,1],[76,21,76,108,1],[77,21,77,51,1],[79,21,79,65,1],[81,21,81,119,0],[83,21,83,114,0],[84,21,84,73,0],[87,21,87,61,0],[89,9,89,10,1]]);
+    </script>
+  </body>
+</html>

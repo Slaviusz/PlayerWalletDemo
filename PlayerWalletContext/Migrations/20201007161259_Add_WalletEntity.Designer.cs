@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlayerWalletContext;
 
 namespace PlayerWalletContext.Migrations
 {
     [DbContext(typeof(PlayerWalletContext))]
-    partial class PlayerWalletContextModelSnapshot : ModelSnapshot
+    [Migration("20201007161259_Add_WalletEntity")]
+    partial class Add_WalletEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,29 +79,6 @@ namespace PlayerWalletContext.Migrations
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Balance = 0m
                         });
-                });
-
-            modelBuilder.Entity("PlayerWalletContext.Entities.WalletLog", b =>
-                {
-                    b.Property<Guid>("TransactionId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Memento")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ResultType")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("TransactionId", "WalletId");
-
-                    b.ToTable("WalletLogs");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletContext/Migrations/PlayerWalletContextModelSnapshot.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+// &lt;auto-generated /&gt;
+using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using PlayerWalletContext;
+
+namespace PlayerWalletContext.Migrations
+{
+    [DbContext(typeof(PlayerWalletContext))]
+    partial class PlayerWalletContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasAnnotation(&quot;ProductVersion&quot;, &quot;3.1.8&quot;);
+
+            modelBuilder.Entity(&quot;PlayerWalletContext.Entities.Player&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;TEXT&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;Active&quot;)
+                        .HasColumnType(&quot;INTEGER&quot;);
+
+                    b.Property&lt;string&gt;(&quot;PlayerName&quot;)
+                        .IsRequired()
+                        .HasColumnType(&quot;TEXT&quot;)
+                        .HasMaxLength(32);
+
+                    b.Property&lt;byte[]&gt;(&quot;RowVersion&quot;)
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType(&quot;BLOB&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;Active&quot;);
+
+                    b.HasIndex(&quot;PlayerName&quot;)
+                        .IsUnique();
+
+                    b.ToTable(&quot;Players&quot;);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;11111111-1111-1111-1111-111111111111&quot;),
+                            Active = true,
+                            PlayerName = &quot;NicknameJim&quot;
+                        });
+                });
+
+            modelBuilder.Entity(&quot;PlayerWalletContext.Entities.Wallet&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;TEXT&quot;);
+
+                    b.Property&lt;decimal&gt;(&quot;Balance&quot;)
+                        .HasColumnType(&quot;TEXT&quot;);
+
+                    b.Property&lt;byte[]&gt;(&quot;RowVersion&quot;)
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType(&quot;BLOB&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.ToTable(&quot;Wallet&quot;);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;11111111-1111-1111-1111-111111111111&quot;),
+                            Balance = 0m
+                        });
+                });
+
+            modelBuilder.Entity(&quot;PlayerWalletContext.Entities.WalletLog&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;TransactionId&quot;)
+                        .HasColumnType(&quot;TEXT&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;WalletId&quot;)
+                        .HasColumnType(&quot;TEXT&quot;);
+
+                    b.Property&lt;DateTime&gt;(&quot;CreatedAt&quot;)
+                        .HasColumnType(&quot;TEXT&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Memento&quot;)
+                        .IsRequired()
+                        .HasColumnType(&quot;TEXT&quot;);
+
+                    b.Property&lt;int&gt;(&quot;ResultType&quot;)
+                        .HasColumnType(&quot;INTEGER&quot;);
+
+                    b.HasKey(&quot;TransactionId&quot;, &quot;WalletId&quot;);
+
+                    b.ToTable(&quot;WalletLogs&quot;);
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,9,14,10,0],[16,13,17,59,0],[19,13,20,17,0],[20,17,20,18,0],[20,18,21,21,0],[21,21,23,48,0],[23,48,25,21,0],[25,21,26,51,0],[26,51,28,21,0],[28,21,31,43,0],[31,43,33,21,0],[33,21,36,48,0],[36,48,38,21,0],[38,21,38,36,0],[38,36,40,21,0],[40,21,40,42,0],[40,42,42,21,0],[42,21,43,37,0],[43,37,45,21,0],[45,21,45,42,0],[45,42,47,21,0],[47,21,53,28,0],[53,28,54,17,0],[54,17,54,18,0],[54,18,54,20,0],[19,13,54,20,0],[56,13,57,17,0],[57,17,57,18,0],[57,18,58,21,0],[58,21,60,48,0],[60,48,62,21,0],[62,21,63,48,0],[63,48,65,21,0],[65,21,68,48,0],[68,48,70,21,0],[70,21,70,36,0],[70,36,72,21,0],[72,21,72,41,0],[72,41,74,21,0],[74,21,79,28,0],[79,28,80,17,0],[80,17,80,18,0],[80,18,80,20,0],[56,13,80,20,0],[82,13,83,17,0],[83,17,83,18,0],[83,18,84,21,0],[84,21,85,48,0],[85,48,87,21,0],[87,21,88,48,0],[88,48,90,21,0],[90,21,91,48,0],[91,48,93,21,0],[93,21,95,48,0],[95,48,97,21,0],[97,21,98,51,0],[98,51,100,21,0],[100,21,100,59,0],[100,59,102,21,0],[102,21,102,45,0],[102,45,103,17,0],[103,17,103,18,0],[103,18,103,20,0],[82,13,103,20,0],[105,9,105,10,0]]);
+    </script>
+  </body>
+</html>

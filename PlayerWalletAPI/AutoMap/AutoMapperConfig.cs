@@ -13,13 +13,20 @@ namespace PlayerWalletAPI.AutoMap
     {
         public AutoMapperConfig()
         {
-            // Player DTO to ResponseModel
+            #region Player
+            // Player Entity to ResponseModel DTO
             CreateMap<Player, PlayerModelResponse>();
 
             // PlayerAddRequest from PlayerController.Add() to Player DTO
             var map1 = CreateMap<PlayerAddRequest, Player>();
             map1.ForMember(player => player.Id, opt => opt.MapFrom(add => add.TransactionId));
             map1.ForMember(player => player.PlayerName, opt => opt.MapFrom(add => add.PlayerName));
+            #endregion
+
+            #region Wallet
+            // Wallet Entity to WalletModel DTO
+            CreateMap<Wallet, WalletModelResponse>();
+            #endregion
         }
     }
 }

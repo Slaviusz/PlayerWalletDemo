@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletContext/Migrations/20201007155113_AddIndex_Player.PlayerName.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Microsoft.EntityFrameworkCore.Migrations;
+
+namespace PlayerWalletContext.Migrations
+{
+    public partial class AddIndex_PlayerPlayerName : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_Players_PlayerName&quot;,
+                table: &quot;Players&quot;,
+                column: &quot;PlayerName&quot;,
+                unique: true);
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: &quot;IX_Players_PlayerName&quot;,
+                table: &quot;Players&quot;);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,10,0],[9,13,13,31,0],[14,9,14,10,0],[17,9,17,10,0],[18,13,20,35,0],[21,9,21,10,0]]);
+    </script>
+  </body>
+</html>

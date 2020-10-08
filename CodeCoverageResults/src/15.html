@@ -2,33 +2,137 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Program.cs</title>
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Controllers/v1/PlayerController.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using PlayerWalletAPI.Models.Request;
+using PlayerWalletAPI.Models.Response;
+using PlayerWalletAPI.Validators;
+using PlayerWalletContext.Entities;
 
-namespace PlayerWalletAPI
+namespace PlayerWalletAPI.Controllers.v1
 {
-    public class Program
+    [ApiController]
+    [Route(&quot;v1/[controller]&quot;)]
+    [AllowAnonymous]
+    public class PlayerController : ControllerBase
     {
-        public static void Main(string[] args)
+        private readonly ILogger&lt;PlayerController&gt; _logger;
+        private readonly PlayerWalletContext.PlayerWalletContext _db;
+        private readonly IMapper _mapper;
+
+        public PlayerController(
+            ILogger&lt;PlayerController&gt; logger,
+            PlayerWalletContext.PlayerWalletContext dbContext,
+            IMapper mapper
+            )
         {
-            CreateHostBuilder(args).Build().Run();
+            _logger = logger;
+            _db = dbContext;
+            _mapper = mapper;
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =&gt;
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =&gt; { webBuilder.UseStartup&lt;Startup&gt;(); });
+        /// &lt;summary&gt;
+        /// Get list of all Players
+        /// &lt;/summary&gt;
+        /// &lt;returns&gt;list of all Players&lt;/returns&gt;
+        [HttpGet(&quot;GetAll&quot;)]
+        [Produces(&quot;application/json&quot;)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable&lt;PlayerModelResponse&gt;))]
+        public async Task&lt;IActionResult&gt; GetAllPlayers()
+        {
+            var result = await _db.Players
+                .ProjectTo&lt;PlayerModelResponse&gt;(_mapper.ConfigurationProvider)
+                .ToArrayAsync();
+
+            return Ok(result);
+        }
+
+        /// &lt;summary&gt;
+        /// Return Player object based on its Guid
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;playerId&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;Player object&lt;/returns&gt;
+        [HttpGet(&quot;{playerId}&quot;)]
+        [Produces(&quot;application/json&quot;)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlayerModelResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestObjectResult))]
+        public async Task&lt;IActionResult&gt; Get([FromRoute] Guid playerId)
+        {
+            var result = await _db.Players
+                .Where(p =&gt; p.Id == playerId)
+                .ProjectTo&lt;PlayerModelResponse&gt;(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
+
+            if (result == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return Ok(result);
+        }
+
+        /// &lt;summary&gt;
+        /// Adds new Player and his empty wallet.
+        /// &lt;/summary&gt;
+        /// &lt;remarks&gt;
+        /// Validations:
+        /// * PlayerName length 4-20 characters
+        /// * PlayerAge &gt;= 18 y
+        /// * PlayerName does not exist yet
+        /// &lt;/remarks&gt;
+        /// &lt;param name=&quot;model&quot;&gt;&lt;/param&gt;
+        /// &lt;returns&gt;&lt;see cref=&quot;PlayerModelResponse&quot;/&gt; object if succesfull&lt;/returns&gt;
+        [HttpPost(&quot;[action]&quot;)]
+        [Produces(&quot;application/json&quot;)]
+        [Consumes(&quot;application/json&quot;)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PlayerModelResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestObjectResult))]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ValidateNewPlayer] // Perform new Player validations (Validators\ValidateNewPlayer.cs)
+        public async Task&lt;IActionResult&gt; Add([FromBody] PlayerAddRequest model)
+        {
+            // at this point model has been validated
+            var newPlayer = _mapper.Map&lt;Player&gt;(model);
+            newPlayer.Active = true; // set initial status of player to Active
+
+            // ReSharper disable once MethodHasAsyncOverload
+            // AddAsync() overload has special use-case for client-side HiLo generated PKs
+            _db.Players.Add(newPlayer);
+
+            // Save Unit-of-Work
+            // do not handle exceptions here to let other
+            // services know we failed and they need to retry
+            await _db.SaveChangesAsync();
+
+            // TODO: More structured logging with NLog
+            _logger.LogInformation($@&quot;&gt;&gt;&gt; PlayerController.Add() success - Id &quot;&quot;{model.TransactionId}&quot;&quot;, Name &quot;&quot;{model.PlayerName}&quot;&quot;.&quot;);
+
+            var result = _mapper.Map&lt;Player, PlayerModelResponse&gt;(newPlayer);
+
+            return Created($&quot;/v1/{ControllerContext.ActionDescriptor.ControllerName}/{model.TransactionId}&quot;, result);
+        }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[14,13,15,57,1],[15,57,15,58,1],[15,58,15,59,1],[15,59,15,92,1],[15,92,15,93,1],[15,93,15,94,1],[15,94,15,95,1],[14,13,15,95,1]]);
+      highlightRanges([[28,9,32,14,1],[33,9,33,10,1],[34,13,34,30,1],[35,13,35,29,1],[36,13,36,30,1],[37,9,37,10,1],[47,9,47,10,1],[48,13,50,33,1],[52,13,52,31,1],[53,9,53,10,1],[66,9,66,10,1],[67,13,70,40,1],[72,13,72,32,1],[73,13,73,14,1],[74,17,74,45,1],[77,13,77,31,1],[78,9,78,10,1],[99,9,99,10,1],[101,13,101,56,1],[102,13,102,37,1],[106,13,106,40,1],[111,13,111,42,1],[114,13,114,137,1],[116,13,116,78,1],[118,13,118,118,1],[119,9,119,10,1]]);
     </script>
   </body>
 </html>

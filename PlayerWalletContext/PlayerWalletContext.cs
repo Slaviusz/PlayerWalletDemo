@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using PlayerWalletContext.Entities;
@@ -78,6 +79,8 @@ namespace PlayerWalletContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region Player
+
             // index on Active status for state validation
             modelBuilder.Entity<Player>()
                 .HasIndex(p => p.Active);
@@ -87,22 +90,67 @@ namespace PlayerWalletContext
                 .HasIndex(p => p.PlayerName)
                 .IsUnique();
 
+            #endregion
+
+            #region MyRegion
+
+            modelBuilder.Entity<Wallet>()
+                .Property(wallet => wallet.RowVersion)
+                .IsRequired(false);
+
+            #endregion
+
             // Seed data to have something to start with
             SeedData(modelBuilder);
         }
 
         private static void SeedData(ModelBuilder modelBuilder)
         {
+            var seedId = ParseExact("11111111111111111111111111111111", "N");
+
             modelBuilder.Entity<Player>()
                 .HasData(
                     new Player
                     {
-                        Id = ParseExact("11111111111111111111111111111111", "N"),
+                        Id = seedId,
                         Active = true,
                         PlayerName = "NicknameJim"
                     });
+
+            modelBuilder.Entity<Wallet>()
+                .HasData(
+                    new Wallet
+                    {
+                        Id = seedId,
+                        Balance = 0
+                    }
+                );
+
+            modelBuilder.Entity<WalletLog>()
+                .HasKey(walletLog => new
+                {
+                    walletLog.TransactionId,
+                    walletLog.WalletId
+                });
+
+            // TODO: Add wallet transactions
+            // modelBuilder.Entity<WalletLog>()
+            //     .HasData(
+            //         new List<WalletLog>
+            //         {
+            //             new WalletLog
+            //             {
+            //                 WalletId = seedId,
+            //                 TransactionId = Guid.NewGuid(),
+            //                 ResultType = ResultType.Created,
+            //                 Memento = ""
+            //             }
+            //         }
+            //     );
         }
 
         public DbSet<Player> Players { get; set; }
+        public DbSet<Wallet> Wallet { get; set; }
+        public DbSet<WalletLog> WalletLogs { get; set; }
     }
 }

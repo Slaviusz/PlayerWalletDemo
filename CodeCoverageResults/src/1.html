@@ -2,33 +2,48 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Program.cs</title>
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletContext/Migrations/20201008195255_Add_WalletLogEntity.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace PlayerWalletAPI
+namespace PlayerWalletContext.Migrations
 {
-    public class Program
+    public partial class Add_WalletLogEntity : Migration
     {
-        public static void Main(string[] args)
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-            CreateHostBuilder(args).Build().Run();
+            migrationBuilder.CreateTable(
+                name: &quot;WalletLogs&quot;,
+                columns: table =&gt; new
+                {
+                    TransactionId = table.Column&lt;Guid&gt;(nullable: false),
+                    WalletId = table.Column&lt;Guid&gt;(nullable: false),
+                    CreatedAt = table.Column&lt;DateTime&gt;(nullable: false),
+                    ResultType = table.Column&lt;int&gt;(nullable: false),
+                    Memento = table.Column&lt;string&gt;(nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_WalletLogs&quot;, x =&gt; new { x.TransactionId, x.WalletId });
+                });
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =&gt;
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =&gt; { webBuilder.UseStartup&lt;Startup&gt;(); });
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: &quot;WalletLogs&quot;);
+        }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[14,13,15,57,1],[15,57,15,58,1],[15,58,15,59,1],[15,59,15,92,1],[15,92,15,93,1],[15,93,15,94,1],[15,94,15,95,1],[14,13,15,95,1]]);
+      highlightRanges([[9,9,9,10,0],[10,13,12,35,0],[12,35,19,18,0],[19,18,21,17,0],[21,17,21,18,0],[21,18,22,21,0],[22,21,22,97,0],[22,97,23,17,0],[23,17,23,18,0],[23,18,23,20,0],[10,13,23,20,0],[24,9,24,10,0],[27,9,27,10,0],[28,13,29,37,0],[30,9,30,10,0]]);
     </script>
   </body>
 </html>

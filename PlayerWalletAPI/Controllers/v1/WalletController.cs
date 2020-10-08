@@ -1,13 +1,3 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Controllers/v1/WalletController.cs</title>
-    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
-    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
-  </head>
-  <body>
-    <pre id="content" class="source-code">
 using System;
 using System.Data;
 using System.Linq;
@@ -28,11 +18,11 @@ using PlayerWalletContext.Entities;
 namespace PlayerWalletAPI.Controllers.v1
 {
     [ApiController]
-    [Route(&quot;v1/[controller]&quot;)]
+    [Route("v1/[controller]")]
     [AllowAnonymous]
     public class WalletController : ControllerBase
     {
-        private readonly ILogger&lt;WalletController&gt; _logger;
+        private readonly ILogger<WalletController> _logger;
         private readonly PlayerWalletContext.PlayerWalletContext _db;
         private readonly IMapper _mapper;
 
@@ -44,13 +34,13 @@ namespace PlayerWalletAPI.Controllers.v1
             IgnoreNullValues = false
         };
 
-        /// &lt;summary&gt;
+        /// <summary>
         /// ResponseObject for WalletLog Unprocessable Transactions
-        /// &lt;/summary&gt;
+        /// </summary>
         public static readonly object UnprocessableWalletLogResponseObject = new
         {
             Code = 4,
-            Message = &quot;Transaction would result in Wallet negative balance!&quot;
+            Message = "Transaction would result in Wallet negative balance!"
         };
 
         // All Transaction types that affect Balance negatively
@@ -69,7 +59,7 @@ namespace PlayerWalletAPI.Controllers.v1
         };
 
         public WalletController(
-            ILogger&lt;WalletController&gt; logger,
+            ILogger<WalletController> logger,
             PlayerWalletContext.PlayerWalletContext db,
             IMapper mapper
         )
@@ -79,21 +69,21 @@ namespace PlayerWalletAPI.Controllers.v1
             _mapper = mapper;
         }
 
-        /// &lt;summary&gt;
-        /// Return Player&#39;s Wallet object based on its Guid
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;walletGuid&quot;&gt;&lt;/param&gt;
-        /// &lt;returns&gt;Wallet object&lt;/returns&gt;
-        [HttpGet(&quot;{walletGuid}&quot;)]
-        [Produces(&quot;application/json&quot;)]
+        /// <summary>
+        /// Return Player's Wallet object based on its Guid
+        /// </summary>
+        /// <param name="walletGuid"></param>
+        /// <returns>Wallet object</returns>
+        [HttpGet("{walletGuid}")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WalletModelResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(NotFoundResult))]
-        public async Task&lt;IActionResult&gt; GetById([FromRoute] Guid walletGuid)
+        public async Task<IActionResult> GetById([FromRoute] Guid walletGuid)
         {
             var result = await _db.Wallet
                 .AsNoTracking()
-                .Where(wallet =&gt; wallet.Id == walletGuid)
-                .ProjectTo&lt;WalletModelResponse&gt;(_mapper.ConfigurationProvider)
+                .Where(wallet => wallet.Id == walletGuid)
+                .ProjectTo<WalletModelResponse>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync();
 
             if (result == null)
@@ -104,19 +94,19 @@ namespace PlayerWalletAPI.Controllers.v1
             return Ok(result);
         }
 
-        /// &lt;summary&gt;
-        /// Attempts operation on Player&#39;s Wallet
-        /// &lt;/summary&gt;
-        /// &lt;remarks&gt;
+        /// <summary>
+        /// Attempts operation on Player's Wallet
+        /// </summary>
+        /// <remarks>
         /// Validations:
         /// * Operation does not produce negative balance
-        /// &lt;/remarks&gt;
-        /// &lt;param name=&quot;walletGuid&quot;&gt;&lt;/param&gt;
-        /// &lt;param name=&quot;model&quot;&gt;&lt;/param&gt;
-        /// &lt;returns&gt;&lt;/returns&gt;
-        [HttpPut(&quot;{walletGuid}&quot;)]
-        [Produces(&quot;application/json&quot;)]
-        [Consumes(&quot;application/json&quot;)]
+        /// </remarks>
+        /// <param name="walletGuid"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPut("{walletGuid}")]
+        [Produces("application/json")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(WalletOperationResult))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestObjectResult))]
         // Transaction woould result in integrity corruption
@@ -124,30 +114,30 @@ namespace PlayerWalletAPI.Controllers.v1
         // Optimimstic concurrency failed
         [ProducesResponseType(StatusCodes.Status412PreconditionFailed)]
         [ValidateExistingTransaction]
-        public async Task&lt;IActionResult&gt; AttemptTransaction([FromRoute] Guid walletGuid, [FromBody] WalletOperationRequest model)
+        public async Task<IActionResult> AttemptTransaction([FromRoute] Guid walletGuid, [FromBody] WalletOperationRequest model)
         {
             // At this point Model is validated
-            // Get player&#39;s Wallet tracked Entity
+            // Get player's Wallet tracked Entity
             var playersWallet = await _db.Wallet
-                .Where(wallet =&gt; wallet.Id == walletGuid)
+                .Where(wallet => wallet.Id == walletGuid)
                 .FirstOrDefaultAsync();
 
-            // If we&#39;re dealing with negative transaction type
+            // If we're dealing with negative transaction type
             if (NegativeTransactionTypes.Contains(model.TransactionType))
             {
                 // check if it results in positive Balance in the end
-                if ((playersWallet.Balance - model.Amount) &lt; decimal.Zero)
+                if ((playersWallet.Balance - model.Amount) < decimal.Zero)
                 {
                     return new UnprocessableEntityObjectResult(UnprocessableWalletLogResponseObject);
                 }
 
-                // Update Player&#39;s Wallet Balance
+                // Update Player's Wallet Balance
                 playersWallet.Balance -= model.Amount;
             }
 
             if (PositiveTranscationTypes.Contains(model.TransactionType))
             {
-                // Update Player&#39;s Wallet Balance
+                // Update Player's Wallet Balance
                 playersWallet.Balance += model.Amount;
             }
 
@@ -193,20 +183,20 @@ namespace PlayerWalletAPI.Controllers.v1
             }
 
             // TODO: Fill in uri to Get method where the transaction can be found
-            return Created(&quot;&quot;, result);
+            return Created("", result);
         }
     }
     
-    /// &lt;summary&gt;
+    /// <summary>
     /// Custom implementation of missing PreconditionFailedResult
-    /// &lt;/summary&gt;
+    /// </summary>
     public sealed class CustomPreconditionFailedResult : IActionResult
     {
-        /// &lt;summary&gt;
+        /// <summary>
         /// Custom IActionResult for missing PreconditionFailed HTTP 412 status
-        /// &lt;/summary&gt;
-        /// &lt;param name=&quot;context&quot;&gt;&lt;/param&gt;
-        /// &lt;returns&gt;&lt;/returns&gt;
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public Task ExecuteResultAsync(ActionContext context)
         {
             var objectResult = new ObjectResult(null)
@@ -218,10 +208,3 @@ namespace PlayerWalletAPI.Controllers.v1
         }
     }
 }
-
-    </pre>
-    <script type="text/javascript">
-      highlightRanges([[30,9,35,11,1],[40,9,44,11,1],[47,9,53,11,1],[55,9,59,11,1],[61,9,65,10,1],[66,9,66,10,1],[67,13,67,30,1],[68,13,68,22,1],[69,13,69,30,1],[70,9,70,10,1],[82,9,82,10,1],[83,13,87,40,1],[89,13,89,32,1],[90,13,90,14,1],[91,17,91,45,1],[94,13,94,31,1],[95,9,95,10,1],[118,9,118,10,1],[121,13,123,40,1],[126,13,126,74,1],[127,13,127,14,1],[129,17,129,75,1],[130,17,130,18,1],[131,21,131,102,1],[135,17,135,55,1],[136,13,136,14,1],[138,13,138,74,1],[139,13,139,14,1],[141,17,141,55,1],[142,13,142,14,1],[148,13,157,15,1],[161,13,170,15,1],[173,13,173,14,1],[174,17,174,46,1],[175,13,175,14,1],[176,13,176,43,0],[177,13,177,14,0],[182,17,182,61,0],[186,13,186,40,1],[187,9,187,10,1],[201,9,201,10,0],[202,13,205,15,0],[207,13,207,61,0],[208,9,208,10,0]]);
-    </script>
-  </body>
-</html>
