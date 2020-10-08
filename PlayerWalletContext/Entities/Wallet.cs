@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+#nullable disable
 
 namespace PlayerWalletContext.Entities {
 	public class Wallet {

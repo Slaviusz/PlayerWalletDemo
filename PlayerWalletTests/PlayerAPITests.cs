@@ -47,7 +47,6 @@ namespace PlayerWalletTests
             players.FirstOrDefault(player => player.Id == SeedPlayerId).ShouldNotBeNull();
         }
 
-
         [Fact]
         private async Task TestPlayerGetById()
         {

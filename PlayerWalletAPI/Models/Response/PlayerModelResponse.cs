@@ -23,6 +23,11 @@ namespace PlayerWalletAPI.Models.Response
         [SourceMember("PlayerName")]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Whether this operation was actually
+        /// performed or the result was retrieved
+        /// from the log due to repeted attempt
+        /// </summary>
         [DefaultValue(false)]
         public bool Repeated { get; set; }
     }
