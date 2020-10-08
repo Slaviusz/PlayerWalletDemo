@@ -128,6 +128,7 @@ namespace PlayerWalletAPI.Controllers.v1
                 // check if it results in positive Balance in the end
                 if ((playersWallet.Balance - model.Amount) < decimal.Zero)
                 {
+                    _logger.LogWarning($@">>> WalletController.AttemptTransaction() - Operation of {nameof(model.TransactionType)} with Amount of {model.Amount} would result in negative balance!.");
                     return new UnprocessableEntityObjectResult(UnprocessableWalletLogResponseObject);
                 }
 
@@ -179,6 +180,7 @@ namespace PlayerWalletAPI.Controllers.v1
                 // has been changed during this transaction.
                 // Signal this back to the client which is
                 // responsible for retry!
+                _logger.LogDebug($@">>> WalletController.AttemptTransaction() - This transaction failed optimistic concurrency!");
                 return new CustomPreconditionFailedResult();
             }
 
