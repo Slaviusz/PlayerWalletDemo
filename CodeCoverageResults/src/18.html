@@ -2,53 +2,78 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Models/Request/PlayerAddRequest.cs</title>
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Validators/ValidateNewPlayer.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-#nullable disable
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using PlayerWalletAPI.Models.Request;
+using PlayerWalletAPI.Models.Response;
+using PlayerWalletContext.Entities;
 
-namespace PlayerWalletAPI.Models.Request
+namespace PlayerWalletAPI.Validators
 {
     /// &lt;summary&gt;
-    /// Request model for PlayerController.Add()
+    /// Validator for PlayerController.Add()
     /// &lt;/summary&gt;
-    public sealed class PlayerAddRequest : IValidatableObject
+    public class ValidateNewPlayer : ActionFilterAttribute
     {
-        /// &lt;summary&gt;
-        /// Transaction Id that becomes user&#39;s Id if successfull
-        /// &lt;/summary&gt;
-        [Required]
-        public Guid TransactionId { get; set; }
-
-        /// &lt;summary&gt;
-        /// Player name
-        /// &lt;/summary&gt;
-        /// &lt;example&gt;LittlePanda88&lt;/example&gt;
-        [Required]
-        [StringLength(20, MinimumLength = 4, ErrorMessage = &quot;Player name must be between {2} - {1} characters long!&quot;)]
-        public string PlayerName { get; set; }
-
-        /// &lt;summary&gt;
-        /// Player birth date
-        /// &lt;/summary&gt;
-        /// &lt;example&gt;19.12.1991&lt;/example&gt;
-        [Required]
-        [DataType(DataType.Date)]
-        public DateTime BirthDate { get; set; } // Let&#39;s ignore timezone differences for now
-
-        public IEnumerable&lt;ValidationResult&gt; Validate(ValidationContext validationContext)
+        /// Validates if:
+        /// * transaction is retried (player already exists)
+        /// * new Player name conflicts with existing name in the DB
+        ///
+        /// &lt;returns&gt;Existing object if transaction is retried&lt;/returns&gt;
+        /// &lt;returns&gt;ConflictObject if Player Name already exists&lt;/returns&gt;
+        public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if (BirthDate.AddYears(18) &gt; DateTime.Now)
+            var db = context.HttpContext.RequestServices.GetRequiredService&lt;PlayerWalletContext.PlayerWalletContext&gt;();
+            var mapper = context.HttpContext.RequestServices.GetRequiredService&lt;IMapper&gt;();
+
+            var model = context.ActionArguments[&quot;model&quot;] as PlayerAddRequest;
+            var transactionId = model?.TransactionId;
+            var playerName = model?.PlayerName;
+
+            var existingPlayer = await db.Players
+                .AsNoTracking()
+                .Where(p =&gt;
+                    p.Id == transactionId ||
+                    p.PlayerName == playerName
+                ) // Combine the condition to avoid double database access
+                .FirstOrDefaultAsync();
+
+            if (existingPlayer == null)
             {
-                yield return new ValidationResult(
-                    &quot;Player must be at least 18 years old!&quot;,
-                    new[] { nameof(BirthDate) });
+                // continue normal execution
+                await next();
+                return;
+            }
+
+            // this transaction is repeated
+            if (existingPlayer.Id == transactionId)
+            {
+                var repeatedResult = mapper.Map&lt;Player, PlayerModelResponse&gt;(existingPlayer);
+                repeatedResult.Repeated = true;
+                context.Result = new OkObjectResult(repeatedResult);
+                return;
+            }
+
+            // conflicting PlayerName
+            if (existingPlayer.PlayerName == playerName)
+            {
+                context.Result = new ConflictObjectResult(new
+                {
+                    Code = 3,
+                    Message = $@&quot;Conflicting PlayerName value of &quot;&quot;{playerName}&quot;&quot;.&quot;
+                });
+                return;
             }
         }
     }
@@ -56,7 +81,7 @@ namespace PlayerWalletAPI.Models.Request
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[17,37,17,41,1],[17,42,17,46,1],[25,36,25,40,1],[25,41,25,45,1],[33,37,33,41,1],[33,42,33,46,1],[36,9,36,10,1],[37,13,37,55,1],[38,13,38,14,1],[39,17,41,50,1],[42,13,42,14,1],[43,9,43,10,1]]);
+      highlightRanges([[26,9,26,10,1],[27,13,27,120,1],[28,13,28,92,1],[30,13,30,78,1],[31,13,31,54,1],[32,13,32,48,1],[34,13,40,40,1],[42,13,42,40,1],[43,13,43,14,1],[45,17,45,30,1],[46,17,46,24,1],[50,13,50,52,1],[51,13,51,14,1],[52,17,52,94,1],[53,17,53,48,1],[54,17,54,69,1],[55,17,55,24,1],[59,13,59,57,1],[60,13,60,14,1],[61,17,65,20,1],[66,17,66,24,1],[68,9,68,10,1]]);
     </script>
   </body>
 </html>

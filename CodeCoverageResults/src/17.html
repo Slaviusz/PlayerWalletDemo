@@ -2,45 +2,48 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Models/Response/PlayerModelResponse.cs</title>
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/AutoMap/AutoMapperConfig.cs</title>
     <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
   </head>
   <body>
     <pre id="content" class="source-code">
-using System;
-using System.ComponentModel;
 using AutoMapper;
-using AutoMapper.Configuration.Annotations;
+using PlayerWalletAPI.Models.Request;
+using PlayerWalletAPI.Models.Response;
 using PlayerWalletContext.Entities;
-#nullable disable
+#pragma warning disable 1591
 
-namespace PlayerWalletAPI.Models.Response
+// ReSharper disable UnusedType.Global
+// ReSharper disable UnusedMember.Global
+
+namespace PlayerWalletAPI.AutoMap
 {
-    /// &lt;summary&gt;
-    /// Response model from PlayerController Get* methods
-    /// &lt;/summary&gt;
-    [AutoMap(typeof(Player))]
-    public class PlayerModelResponse
+    public class AutoMapperConfig : Profile
     {
-        public Guid Id { get; set; }
-        public bool Active { get; set; }
+        public AutoMapperConfig()
+        {
+            #region Player
+            // Player Entity to ResponseModel DTO
+            CreateMap&lt;Player, PlayerModelResponse&gt;();
 
-        /// &lt;summary&gt;
-        /// Player name
-        /// &lt;/summary&gt;
-        /// &lt;example&gt;ExamplePlayerName&lt;/example&gt;
-        [SourceMember(&quot;PlayerName&quot;)]
-        public string Name { get; set; }
+            // PlayerAddRequest from PlayerController.Add() to Player DTO
+            var map1 = CreateMap&lt;PlayerAddRequest, Player&gt;();
+            map1.ForMember(player =&gt; player.Id, opt =&gt; opt.MapFrom(add =&gt; add.TransactionId));
+            map1.ForMember(player =&gt; player.PlayerName, opt =&gt; opt.MapFrom(add =&gt; add.PlayerName));
+            #endregion
 
-        [DefaultValue(false)]
-        public bool Repeated { get; set; }
+            #region Wallet
+            // Wallet Entity to WalletModel DTO
+            CreateMap&lt;Wallet, WalletModelResponse&gt;();
+            #endregion
+        }
     }
 }
 
     </pre>
     <script type="text/javascript">
-      highlightRanges([[16,26,16,30,1],[16,31,16,35,1],[17,30,17,34,1],[17,35,17,39,1],[24,30,24,34,1],[24,35,24,39,1],[27,32,27,36,1],[27,37,27,41,1]]);
+      highlightRanges([[14,9,14,34,1],[15,9,15,10,1],[18,13,18,54,1],[21,13,21,62,1],[22,13,22,56,1],[22,56,22,93,1],[22,93,22,95,1],[22,13,22,95,1],[23,13,23,64,1],[23,64,23,98,1],[23,98,23,100,1],[23,13,23,100,1],[28,13,28,54,1],[30,9,30,10,1]]);
     </script>
   </body>
 </html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletContext/Entities/Wallet.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+#nullable disable
+
+namespace PlayerWalletContext.Entities {
+	public class Wallet {
+		[Required, Key]
+		public Guid Id { get; set; }
+
+		[Required]
+		[DefaultValue(0)]
+		// Use decimal for currency as it has less
+		// problems due to rounding errors than float/double
+		public decimal Balance { get; set; }
+
+		[Timestamp]
+		// Use RowVersion for optimistic concurrency in
+		// multi-node horizontally scaled environments
+		public byte[] RowVersion { get; set; }
+	}
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,20,9,24,1],[9,25,9,29,1],[15,28,15,32,1],[15,33,15,37,1],[20,30,20,34,1],[20,35,20,39,0]]);
+    </script>
+  </body>
+</html>

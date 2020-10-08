@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletAPI/Startup.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+
+namespace PlayerWalletAPI
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        private IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+                .AddJsonOptions(options =&gt;
+                {
+                    options.JsonSerializerOptions.WriteIndented = true; // Convenience option, remove for production!
+                    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                    options.JsonSerializerOptions.AllowTrailingCommas = true;
+                });
+
+            // SQlite DbContext
+            services.AddDbContextPool&lt;PlayerWalletContext.PlayerWalletContext&gt;(options =&gt;
+                options.UseSqlite(PlayerWalletContext.PlayerWalletContext.SqliteConnectionString));
+
+            // Automapper
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+            #region Swagger
+            services.AddSwaggerGen(c =&gt;
+            {
+                c.SwaggerDoc(&quot;v1&quot;, new OpenApiInfo {Title = &quot;PlayerWallet API&quot;, Version = &quot;v1&quot;});
+                c.EnableAnnotations();
+
+                // Set the comments path for the Swagger JSON and UI.
+                var apiXmlPath = Path.Combine(
+                    AppContext.BaseDirectory,
+                    $&quot;{Assembly.GetExecutingAssembly().GetName().Name}.xml&quot;
+                );
+                c.IncludeXmlComments(apiXmlPath);
+
+                // Uses full schema names to avoid v1/v2/v3 schema collisions
+                // see: https://github.com/domaindrivendev/Swashbuckle/issues/442
+                c.CustomSchemaIds(x =&gt; x.FullName);
+            });
+            #endregion
+        }
+
+        /// &lt;summary&gt;
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;app&quot;&gt;&lt;/param&gt;
+        /// &lt;param name=&quot;env&quot;&gt;&lt;/param&gt;
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            // configuration for deployment behind application proxy server (NGINX, Apache, IIS, etc.)
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+            });
+
+            // disable HTTPS redirection in service oriented architecture
+            // there probably is an HTTPS application proxy server in front
+            //app.UseHttpsRedirection();
+
+            // Disable Authorization in service-to-service interfaces
+            //app.UseAuthorization();
+
+            #region Swagger
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =&gt;
+            {
+                c.SwaggerEndpoint(&quot;/swagger/v1/swagger.json&quot;, &quot;PlayerWallet API v1&quot;);
+                c.DisplayOperationId();
+                c.DisplayRequestDuration();
+            });
+            #endregion
+
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =&gt; { endpoints.MapControllers(); });
+
+            // Initial database seed for first startup
+            DatabaseInitialSeed(app)
+                .ConfigureAwait(false)
+                .GetAwaiter().GetResult();
+        }
+
+        /// &lt;summary&gt;
+        ///
+        /// &lt;/summary&gt;
+        /// &lt;param name=&quot;app&quot;&gt;&lt;/param&gt;
+        /// &lt;exception cref=&quot;InvalidOperationException&quot;&gt;Failed to locate and instantiate service&lt;/exception&gt;
+        private static async Task DatabaseInitialSeed(IApplicationBuilder app)
+        {
+            using var scope = app.ApplicationServices.CreateScope();
+            await using var dbContext = scope.ServiceProvider.GetRequiredService&lt;PlayerWalletContext.PlayerWalletContext&gt;();
+            await dbContext.Database.MigrateAsync();
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[20,9,20,53,1],[21,9,21,10,1],[22,13,22,43,1],[23,9,23,10,1],[25,48,25,52,0],[29,9,29,10,1],[30,13,33,17,1],[33,17,33,18,1],[33,18,34,21,1],[34,21,34,72,1],[34,72,35,21,1],[35,21,35,86,1],[35,86,36,21,1],[36,21,36,78,1],[36,78,37,17,1],[37,17,37,18,1],[37,18,37,20,1],[30,13,37,20,1],[40,13,41,17,1],[41,17,41,98,1],[41,98,41,100,1],[40,13,41,100,1],[44,13,44,69,1],[47,13,48,13,1],[48,13,48,14,1],[48,14,49,17,1],[49,17,49,98,1],[49,98,50,17,1],[50,17,50,39,1],[50,39,53,17,1],[53,17,56,19,1],[56,19,57,17,1],[57,17,57,50,1],[57,50,61,17,1],[61,17,61,40,1],[61,40,61,50,0],[61,50,61,52,1],[61,17,61,52,1],[61,52,62,13,1],[62,13,62,14,1],[62,14,62,16,1],[47,13,62,16,1],[64,9,64,10,1],[72,9,72,10,1],[73,13,73,37,1],[74,13,74,14,1],[75,17,75,49,1],[76,13,76,14,1],[79,13,82,16,1],[92,13,92,30,1],[94,13,95,13,1],[95,13,95,14,1],[95,14,96,17,1],[96,17,96,86,1],[96,86,97,17,1],[97,17,97,40,1],[97,40,98,17,1],[98,17,98,44,1],[98,44,99,13,1],[99,13,99,14,1],[99,14,99,16,1],[94,13,99,16,1],[102,13,102,30,1],[104,13,104,43,1],[104,43,104,44,1],[104,44,104,45,1],[104,45,104,72,1],[104,72,104,73,1],[104,73,104,74,1],[104,74,104,76,1],[104,13,104,76,1],[107,13,109,43,1],[110,9,110,10,1],[118,9,118,10,1],[119,13,119,69,1],[120,13,120,125,1],[121,13,121,53,1],[122,9,122,10,1]]);
+    </script>
+  </body>
+</html>

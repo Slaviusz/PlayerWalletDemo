@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletContext/Entities/Player.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+#nullable disable
+
+namespace PlayerWalletContext.Entities
+{
+    public sealed class Player
+    {
+        [Required, Key]
+        public Guid Id { get; set; }
+        [Required, DefaultValue(&quot;true&quot;)]
+        public bool Active { get; set; }
+        [Required, MinLength(4), MaxLength(32)]
+        public string PlayerName { get; set; }
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,26,11,30,1],[11,31,11,35,1],[13,30,13,34,1],[13,35,13,39,1],[15,36,15,40,1],[15,41,15,45,1],[17,36,17,40,1],[17,41,17,45,0]]);
+    </script>
+  </body>
+</html>

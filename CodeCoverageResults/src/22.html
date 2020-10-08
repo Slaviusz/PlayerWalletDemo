@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletTests/PlayerAPITests_Add.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using PlayerWalletAPI.Models.Request;
+using PlayerWalletAPI.Models.Response;
+using Shouldly;
+using Xunit;
+
+namespace PlayerWalletTests
+{
+    public partial class PlayerApiTests
+    {
+
+        [Fact]
+        private async Task TestPlayerAdd()
+        {
+            var newPlayerGuid = Guid.NewGuid();
+
+            var json = JsonSerializer
+                .Serialize(new PlayerAddRequest
+                {
+                    TransactionId = newPlayerGuid,
+                    BirthDate = DateTime.Now.AddYears(-25),
+                    PlayerName = $&quot;NewPlayer{new Random().Next(1000,9999)}&quot;
+                });
+
+            var requestModel = new StringContent(json, Encoding.UTF8, &quot;application/json&quot;);
+
+            var client = _factory.CreateClient();
+            var response = await client.PostAsync(&quot;v1/Player/Add&quot;, requestModel);
+
+            Should.NotThrow(() =&gt; { response.EnsureSuccessStatusCode(); });
+
+            response.StatusCode.ShouldBe(HttpStatusCode.Created);
+
+            PlayerModelResponse player = null;
+
+            Should.NotThrow(async () =&gt; { player = JsonSerializer.Deserialize&lt;PlayerModelResponse&gt;(await response.Content.ReadAsStringAsync(), _jsonSerializerOptions); });
+
+            player.ShouldNotBeNull();
+            player.Id.ShouldBe(newPlayerGuid);
+            player.Repeated.ShouldBeFalse();
+
+            // repeated request
+
+            var client2 = _factory.CreateClient();
+            var response2 = await client2.PostAsync(&quot;v1/Player/Add&quot;, requestModel);
+
+            Should.NotThrow(() =&gt; { response2.EnsureSuccessStatusCode(); });
+
+            response2.StatusCode.ShouldBe(HttpStatusCode.OK);
+
+            PlayerModelResponse player2 = null;
+
+            Should.NotThrow(async () =&gt; { player2 = JsonSerializer.Deserialize&lt;PlayerModelResponse&gt;(await response2.Content.ReadAsStringAsync(), _jsonSerializerOptions); });
+
+            player2.ShouldNotBeNull();
+            player2.Id.ShouldBe(newPlayerGuid);
+            player2.Repeated.ShouldBeTrue();
+        }
+
+        [Fact]
+        private async Task TestPlayerAdd_NameConflict()
+        {
+            var client = _factory.CreateClient();
+
+            var json = JsonSerializer
+                .Serialize(new PlayerAddRequest
+                {
+                    TransactionId = Guid.NewGuid(),
+                    BirthDate = DateTime.Now.AddYears(-25),
+                    PlayerName = SeedPlayerName
+                });
+
+            var requestModel = new StringContent(json, Encoding.UTF8, &quot;application/json&quot;);
+
+            var response = await client.PostAsync(&quot;v1/Player/Add&quot;, requestModel);
+
+            response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        }
+
+        [Fact]
+        private async Task TestPlayerAdd_NameTooShort()
+        {
+            var client = _factory.CreateClient();
+
+            var json = JsonSerializer
+                .Serialize(new PlayerAddRequest
+                {
+                    TransactionId = Guid.NewGuid(),
+                    BirthDate = DateTime.Now.AddYears(-25),
+                    PlayerName = &quot;a&quot;
+                });
+
+            var requestModel = new StringContent(json, Encoding.UTF8, &quot;application/json&quot;);
+
+            var response = await client.PostAsync(&quot;v1/Player/Add&quot;, requestModel);
+
+            response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+            var problemDetails = await JsonSerializer
+                .DeserializeAsync&lt;ValidationProblemDetails&gt;(response.Content.ReadAsStreamAsync().Result);
+
+            problemDetails.Errors.ShouldContainKey(&quot;PlayerName&quot;);
+            problemDetails.Errors[&quot;PlayerName&quot;].First().ShouldMatch(&quot;name must be between&quot;);
+        }
+
+        [Fact]
+        private async Task TestPlayerAdd_NameTooLong()
+        {
+            var client = _factory.CreateClient();
+
+            var json = JsonSerializer
+                .Serialize(new PlayerAddRequest
+                {
+                    TransactionId = Guid.NewGuid(),
+                    BirthDate = DateTime.Now.AddYears(-25),
+                    PlayerName = &quot;abcdefghijklmnopqrstuvwxyz&quot;
+                });
+
+            var requestModel = new StringContent(json, Encoding.UTF8, &quot;application/json&quot;);
+
+            var response = await client.PostAsync(&quot;v1/Player/Add&quot;, requestModel);
+
+            response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+            var problemDetails = await JsonSerializer
+                .DeserializeAsync&lt;ValidationProblemDetails&gt;(response.Content.ReadAsStreamAsync().Result);
+
+            problemDetails.Errors.ShouldContainKey(&quot;PlayerName&quot;);
+            problemDetails.Errors[&quot;PlayerName&quot;].First().ShouldMatch(&quot;name must be between&quot;);
+        }
+
+        [Fact]
+        private async Task TestPlayerAdd_PlayerTooYoung()
+        {
+            var client = _factory.CreateClient();
+
+            var json = JsonSerializer
+                .Serialize(new PlayerAddRequest
+                {
+                    TransactionId = Guid.NewGuid(),
+                    BirthDate = DateTime.Now.AddYears(-17).AddDays(-364),
+                    PlayerName = &quot;Kiddo123&quot;
+                });
+
+            var requestModel = new StringContent(json, Encoding.UTF8, &quot;application/json&quot;);
+
+            var response = await client.PostAsync(&quot;v1/Player/Add&quot;, requestModel);
+
+            response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+            var problemDetails = await JsonSerializer
+                .DeserializeAsync&lt;ValidationProblemDetails&gt;(response.Content.ReadAsStreamAsync().Result);
+
+            problemDetails.Errors.ShouldContainKey(&quot;BirthDate&quot;);
+            problemDetails.Errors[&quot;BirthDate&quot;].First().ShouldMatch(&quot;must be at least 18 years old&quot;);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,9,21,10,1],[22,13,22,48,1],[24,13,30,20,1],[32,13,32,91,1],[34,13,34,50,1],[35,13,35,82,1],[37,13,37,35,1],[37,35,37,36,1],[37,36,37,37,1],[37,37,37,72,1],[37,72,37,73,1],[37,73,37,74,1],[37,74,37,76,1],[37,13,37,76,1],[39,13,39,66,1],[41,13,41,47,1],[43,13,43,41,1],[43,41,43,42,1],[43,42,43,43,1],[43,43,43,168,1],[43,168,43,169,1],[43,169,43,170,1],[43,170,43,172,1],[43,13,43,172,1],[45,13,45,38,1],[46,13,46,47,1],[47,13,47,45,1],[51,13,51,51,1],[52,13,52,84,1],[54,13,54,35,1],[54,35,54,36,1],[54,36,54,37,1],[54,37,54,73,1],[54,73,54,74,1],[54,74,54,75,1],[54,75,54,77,1],[54,13,54,77,1],[56,13,56,62,1],[58,13,58,48,1],[60,13,60,41,1],[60,41,60,42,1],[60,42,60,43,1],[60,43,60,170,1],[60,170,60,171,1],[60,171,60,172,1],[60,172,60,174,1],[60,13,60,174,1],[62,13,62,39,1],[63,13,63,48,1],[64,13,64,45,1],[65,9,65,10,1],[69,9,69,10,1],[70,13,70,50,1],[72,13,78,20,1],[80,13,80,91,1],[82,13,82,82,1],[84,13,84,67,1],[85,9,85,10,1],[89,9,89,10,1],[90,13,90,50,1],[92,13,98,20,1],[100,13,100,91,1],[102,13,102,82,1],[104,13,104,69,1],[106,13,107,106,1],[109,13,109,66,1],[110,13,110,93,1],[111,9,111,10,1],[115,9,115,10,1],[116,13,116,50,1],[118,13,124,20,1],[126,13,126,91,1],[128,13,128,82,1],[130,13,130,69,1],[132,13,133,106,1],[135,13,135,66,1],[136,13,136,93,1],[137,9,137,10,1],[141,9,141,10,1],[142,13,142,50,1],[144,13,150,20,1],[152,13,152,91,1],[154,13,154,82,1],[156,13,156,69,1],[158,13,159,106,1],[161,13,161,65,1],[162,13,162,101,1],[163,9,163,10,1]]);
+    </script>
+  </body>
+</html>

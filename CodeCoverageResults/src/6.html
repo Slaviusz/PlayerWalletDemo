@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/home/slavius/RiderProjects/PlayerWallet/PlayerWalletContext/Migrations/20201005162947_Add_PlayerEntity.Designer.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+// &lt;auto-generated /&gt;
+using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using PlayerWalletContext;
+
+namespace PlayerWalletContext.Migrations
+{
+    [DbContext(typeof(PlayerWalletContext))]
+    [Migration(&quot;20201005162947_Add_PlayerEntity&quot;)]
+    partial class Add_PlayerEntity
+    {
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasAnnotation(&quot;ProductVersion&quot;, &quot;3.1.8&quot;);
+
+            modelBuilder.Entity(&quot;PlayerWalletContext.Entities.Player&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;TEXT&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;Active&quot;)
+                        .HasColumnType(&quot;INTEGER&quot;);
+
+                    b.Property&lt;string&gt;(&quot;PlayerName&quot;)
+                        .IsRequired()
+                        .HasColumnType(&quot;TEXT&quot;)
+                        .HasMaxLength(32);
+
+                    b.Property&lt;byte[]&gt;(&quot;RowVersion&quot;)
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType(&quot;BLOB&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;Active&quot;);
+
+                    b.ToTable(&quot;Players&quot;);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;11111111-1111-1111-1111-111111111111&quot;),
+                            Active = true,
+                            PlayerName = &quot;NicknameJim&quot;
+                        });
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,10,0],[18,13,19,59,0],[21,13,22,17,0],[22,17,22,18,0],[22,18,23,21,0],[23,21,25,48,0],[25,48,27,21,0],[27,21,28,51,0],[28,51,30,21,0],[30,21,33,43,0],[33,43,35,21,0],[35,21,38,48,0],[38,48,40,21,0],[40,21,40,36,0],[40,36,42,21,0],[42,21,42,42,0],[42,42,44,21,0],[44,21,44,42,0],[44,42,46,21,0],[46,21,52,28,0],[52,28,53,17,0],[53,17,53,18,0],[53,18,53,20,0],[21,13,53,20,0],[55,9,55,10,0]]);
+    </script>
+  </body>
+</html>
