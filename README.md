@@ -18,7 +18,7 @@ Uses SQLite for normal operation.
 
 Includes 2 more constructors:
 - one for InMemory mocks (used by the xUnit Test project)
-- one for CLI (`dotnet ef` commands to generate migrations and perform them)
+- one for CLI (`dotnet ef` commands to generate migrations and apply/revert them)
 
 ### PlayerWalletTests
 xUnit Test project with MS Visual Studio integration using ShouldLy extension.
