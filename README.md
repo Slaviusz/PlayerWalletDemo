@@ -30,5 +30,6 @@ PUT requests to API controller methods are using AOP validations (using `ActionF
 
 Given the database backend is not the bottleneck it can be horizontally scaled by deploying many nodes. Each transaction modifying an Entity implements Optimistic Locking/Concurrency.
 If the Entity being updated changed while the transaction was running a client receives HTTP status code 412 `Precondition Failed`. It is up to the client to repeat the transaction until it succeeds.
+This is implemented using `RowVersion` database column. This however is not supported by SQLite so appropriate tests are missing.
 
 Player's Wallet Entity also implements Memento pattern to save Events to a WalletLog table. This table is used to keep track of Event Stream on top of the Entity and to return the same ResultObject on repeated transactions.
