@@ -20,11 +20,9 @@ namespace PlayerWalletAPI.Validators
     public class ValidateExistingTransaction : ActionFilterAttribute
     {
         /// Validates if:
-        /// * transaction is retried (player already exists)
-        /// * new Player name conflicts with existing name in the DB
+        /// * transaction is retried
         ///
         /// <returns>Existing object if transaction is retried</returns>
-        /// <returns>ConflictObject if Player Name already exists</returns>
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var db = context.HttpContext.RequestServices.GetRequiredService<PlayerWalletContext.PlayerWalletContext>();
@@ -37,7 +35,7 @@ namespace PlayerWalletAPI.Validators
                 .AsNoTracking()
                 .Where(p =>
                     p.TransactionId == transactionId
-                ) // Combine the condition to avoid double database access
+                )
                 .FirstOrDefaultAsync();
 
             if (existingTransaction == null)
