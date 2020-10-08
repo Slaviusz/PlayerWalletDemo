@@ -109,7 +109,7 @@ namespace PlayerWalletAPI.Controllers.v1
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(WalletOperationResult))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BadRequestObjectResult))]
-        // Transaction woould result in integrity corruption
+        // Transaction would result in integrity corruption
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(UnprocessableEntityObjectResult))]
         // Optimimstic concurrency failed
         [ProducesResponseType(StatusCodes.Status412PreconditionFailed)]
@@ -176,8 +176,8 @@ namespace PlayerWalletAPI.Controllers.v1
             catch (DBConcurrencyException)
             {
                 // Optimistic concurrency failed as the object
-                // has been changed during this transaction
-                // signal this bac to the client which is
+                // has been changed during this transaction.
+                // Signal this back to the client which is
                 // responsible for retry!
                 return new CustomPreconditionFailedResult();
             }
