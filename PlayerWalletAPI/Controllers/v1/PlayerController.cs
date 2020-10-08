@@ -53,7 +53,7 @@ namespace PlayerWalletAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Returns Player object based on its Guid
+        /// Return Player object based on its Guid
         /// </summary>
         /// <param name="playerId"></param>
         /// <returns>Player object</returns>

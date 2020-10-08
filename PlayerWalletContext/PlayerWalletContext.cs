@@ -78,6 +78,7 @@ namespace PlayerWalletContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region Player
             // index on Active status for state validation
             modelBuilder.Entity<Player>()
                 .HasIndex(p => p.Active);
@@ -86,6 +87,15 @@ namespace PlayerWalletContext
             modelBuilder.Entity<Player>()
                 .HasIndex(p => p.PlayerName)
                 .IsUnique();
+            #endregion
+
+            #region MyRegion
+
+            modelBuilder.Entity<Wallet>()
+                .Property(wallet => wallet.RowVersion)
+                .IsRequired(false);
+
+            #endregion
 
             // Seed data to have something to start with
             SeedData(modelBuilder);
@@ -93,16 +103,27 @@ namespace PlayerWalletContext
 
         private static void SeedData(ModelBuilder modelBuilder)
         {
+            var seedId = ParseExact("11111111111111111111111111111111", "N");
+
             modelBuilder.Entity<Player>()
                 .HasData(
                     new Player
                     {
-                        Id = ParseExact("11111111111111111111111111111111", "N"),
+                        Id = seedId,
                         Active = true,
                         PlayerName = "NicknameJim"
                     });
+
+            modelBuilder.Entity<Wallet>()
+                .HasData(
+                    new Wallet {
+                        Id = seedId,
+                        Balance = 0
+                    }
+                );
         }
 
         public DbSet<Player> Players { get; set; }
+        public DbSet<Wallet> Wallet { get; set; }
     }
 }

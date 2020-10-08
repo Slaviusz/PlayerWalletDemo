@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlayerWalletContext;
 
 namespace PlayerWalletContext.Migrations
 {
     [DbContext(typeof(PlayerWalletContext))]
-    partial class PlayerWalletContextModelSnapshot : ModelSnapshot
+    [Migration("20201007155113_AddIndex_Player.PlayerName")]
+    partial class AddIndex_PlayerPlayerName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,32 +52,6 @@ namespace PlayerWalletContext.Migrations
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
                             Active = true,
                             PlayerName = "NicknameJim"
-                        });
-                });
-
-            modelBuilder.Entity("PlayerWalletContext.Entities.Wallet", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Wallet");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            Balance = 0m
                         });
                 });
 #pragma warning restore 612, 618
