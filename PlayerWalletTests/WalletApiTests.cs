@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PlayerWalletAPI.Models.Request;
 using PlayerWalletAPI.Models.Response;
@@ -77,12 +78,16 @@ namespace PlayerWalletTests
         {
             var client = _factory.CreateClient();
 
+            var currentBalance = (await _db.Wallet
+                .FirstAsync(wallet => wallet.Id == SeedWalletId))
+                .Balance;
+
             var json = JsonSerializer
                 .Serialize(new WalletOperationRequest
                 {
                     TransactionId = Guid.NewGuid(),
                     TransactionType = WalletTransactionType.Withdrawal,
-                    Amount = 1000m
+                    Amount = currentBalance + 1m // try to withdraw more than current balance
                 });
 
             var requestModel = new StringContent(json, Encoding.UTF8, "application/json");
@@ -143,8 +148,8 @@ namespace PlayerWalletTests
             walletOperationResult.Repeated.ShouldBeFalse();
 
             // get correct balance from the database
-            var correctBalance = _db.Wallet
-                .First(w => w.Id == SeedWalletId)
+            var correctBalance = (await _db.Wallet
+                .FirstAsync(w => w.Id == SeedWalletId))
                 .Balance;
 
             walletOperationResult.WalletState.Balance.ShouldBe(correctBalance);
