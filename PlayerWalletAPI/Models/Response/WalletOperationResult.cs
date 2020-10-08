@@ -32,7 +32,6 @@ namespace PlayerWalletAPI.Models.Response
         /// <summary>
         /// State of the Wallet at the end of the Operation
         /// </summary>
-        /// <example>{ Balance = 327,50 }</example>
         public WalletModelResponse WalletState { get; set; }
     }
 }

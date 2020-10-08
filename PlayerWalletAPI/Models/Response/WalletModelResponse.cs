@@ -6,7 +6,7 @@ namespace PlayerWalletAPI.Models.Response {
 		/// <summary>
 		/// Current Wallet balance in €
 		/// </summary>
-		/// <example>1510,50</example>
+		/// <example>1510.50</example>
 		public decimal Balance { get; set; }
 	}
 }

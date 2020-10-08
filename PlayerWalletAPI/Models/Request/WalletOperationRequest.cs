@@ -26,6 +26,7 @@ namespace PlayerWalletAPI.Models.Request
         /// Amount attributed to the transaction
         /// Limited to 99 999,99€ due to legal reasons
         /// </summary>
+        /// <example>100.00</example>
         [Required]
         [Range(minimum: 0.01, maximum: 99_999.99, ErrorMessage = "Transaction Amount must fit between 0,01 and 99.999,99!")]
         public decimal Amount { get; set; }
